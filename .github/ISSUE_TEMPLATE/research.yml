@@ -1,0 +1,36 @@
+name: Research question
+description: Propose one bounded research investigation.
+title: "[research] "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use one issue for one exact question. Link the canonical record after creating it.
+  - type: input
+    id: actor
+    attributes:
+      label: Actor and session
+      description: Use a distinguishable person, agent, or session label.
+    validations:
+      required: true
+  - type: textarea
+    id: question
+    attributes:
+      label: Exact question
+      description: State the target, assumptions, and acceptable outcomes.
+    validations:
+      required: true
+  - type: textarea
+    id: scope
+    attributes:
+      label: Scope and paths
+      description: List owned write paths, excluded paths, base commit, and limits.
+    validations:
+      required: true
+  - type: textarea
+    id: validation
+    attributes:
+      label: Validation plan
+      description: Give the falsification test, proof check, or independent predicate.
+    validations:
+      required: true

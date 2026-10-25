@@ -1,0 +1,9 @@
+cff-version: 1.2.0
+message: "If you use this template, cite the repository and the exact commit used. Cite original scientific sources separately."
+title: "Frontier research template"
+type: software
+authors:
+  - family-names: Henglein
+    given-names: Marcus
+repository-code: "https://github.com/mhenglein/frontier-research-template"
+license: MIT

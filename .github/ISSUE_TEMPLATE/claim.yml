@@ -1,0 +1,32 @@
+name: Claim review
+description: Record or review an exact mathematical claim.
+title: "[claim] "
+body:
+  - type: input
+    id: claim_id
+    attributes:
+      label: Claim ID
+      placeholder: C001
+    validations:
+      required: true
+  - type: textarea
+    id: statement
+    attributes:
+      label: Exact statement
+      description: Include all hypotheses and quantifiers.
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Evidence and limits
+      description: Link proofs, experiments, counterexamples, and what remains unknown.
+    validations:
+      required: true
+  - type: textarea
+    id: review
+    attributes:
+      label: Independent review
+      description: State who or what checked it and which parts remain unaudited.
+    validations:
+      required: true

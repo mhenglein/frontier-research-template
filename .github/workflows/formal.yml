@@ -1,0 +1,46 @@
+name: Optional formal checks
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - "formal/**"
+      - "scripts/check_formal.py"
+      - "tests/test_formal.py"
+      - ".github/workflows/formal.yml"
+  pull_request:
+    paths:
+      - "formal/**"
+      - "scripts/check_formal.py"
+      - "tests/test_formal.py"
+      - ".github/workflows/formal.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  lean:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: Check out source
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      - name: Install Lean 4.33.1
+        shell: bash
+        run: |
+          set -euo pipefail
+          elan_version="v4.0.0"
+          elan_url="https://github.com/leanprover/elan/releases/download/${elan_version}/elan-x86_64-unknown-linux-gnu.tar.gz"
+          elan_sha256="e308267c2317ccf8f16e1675b57d5b4b8adae89ea166fc5b3d3ecd29a5c77fc2"
+          curl --proto '=https' --tlsv1.2 -sSfL "$elan_url" -o "$RUNNER_TEMP/elan.tar.gz"
+          echo "$elan_sha256  $RUNNER_TEMP/elan.tar.gz" | sha256sum --check --status
+          mkdir -p "$RUNNER_TEMP/elan-installer"
+          tar -xzf "$RUNNER_TEMP/elan.tar.gz" -C "$RUNNER_TEMP/elan-installer"
+          export ELAN_HOME="$RUNNER_TEMP/elan-home"
+          "$RUNNER_TEMP/elan-installer/elan-init" -y --default-toolchain v4.33.1 --no-modify-path
+          echo "ELAN_HOME=$ELAN_HOME" >> "$GITHUB_ENV"
+          echo "$ELAN_HOME/bin" >> "$GITHUB_PATH"
+          "$ELAN_HOME/bin/elan" --version
+      - name: Run formal checks
+        run: python3 scripts/check_formal.py

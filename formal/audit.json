@@ -1,0 +1,10 @@
+{
+  "version": 1,
+  "declarations": [
+    {
+      "name": "FrontierResearch.infrastructure_smoke",
+      "module": "FrontierResearch",
+      "allowed_axioms": []
+    }
+  ]
+}

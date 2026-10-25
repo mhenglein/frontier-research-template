@@ -1,0 +1,32 @@
+name: Experiment
+description: Register a reproducible experiment or falsification search.
+title: "[experiment] "
+body:
+  - type: input
+    id: experiment_id
+    attributes:
+      label: Experiment ID
+      placeholder: E001
+    validations:
+      required: true
+  - type: textarea
+    id: question
+    attributes:
+      label: Question and linked records
+      description: Link A, C, or Q records.
+    validations:
+      required: true
+  - type: textarea
+    id: protocol
+    attributes:
+      label: Protocol
+      description: Include command, inputs, seeds, coverage, limits, and independent checker.
+    validations:
+      required: true
+  - type: textarea
+    id: result
+    attributes:
+      label: Result
+      description: Use PASS, FAIL, UNKNOWN, or NOT_RUN and explain what it does not establish.
+    validations:
+      required: true

@@ -1,0 +1,25 @@
+name: Formalization
+description: Propose or review selective formal proof work.
+title: "[formal] "
+body:
+  - type: input
+    id: dependency
+    attributes:
+      label: Critical dependency or semantic risk
+      description: Name the uncertainty this formalization resolves.
+    validations:
+      required: true
+  - type: textarea
+    id: interface
+    attributes:
+      label: Intended declaration and semantics
+      description: State the theorem or definition and its ordinary mathematical meaning.
+    validations:
+      required: true
+  - type: textarea
+    id: checks
+    attributes:
+      label: Validation
+      description: List toolchain, build, kernel replay, axiom, and ordinary readback checks.
+    validations:
+      required: true
