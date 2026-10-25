@@ -17,6 +17,16 @@ Search open issues and recent pull requests before repeating an approach. Use a
 scoped issue claim for non-trivial research, review, formalization, tooling, or
 documentation work. An unassigned record or a quiet branch is not free work.
 
+## Established problem statement
+
+Once the user approves the problem statement, `research/problem.md` is read-only
+for agents unless the user explicitly authorizes a change. Record ambiguities
+and proposed corrections in a GitHub Issue. Explore variants in separate
+research records, clearly distinguishing them from the approved problem.
+
+Update `STATE.md` and research records within your assigned scope as knowledge
+changes. New findings do not authorize changes to the approved research target.
+
 ## Scientific method
 
 - Take one precise question at a time. State the target, assumptions, and acceptable outcomes.
