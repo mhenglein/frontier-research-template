@@ -26,7 +26,7 @@ class ReproductionTests(unittest.TestCase):
         (self.root / "scripts/experiments.py").write_text(
             "import json, pathlib, sys\n"
             "out=pathlib.Path(sys.argv[2]); out.mkdir()\n"
-            "(out/'receipt.json').write_text(json.dumps({'status':'INCONCLUSIVE','rows':[]}))\n")
+            "(out/'receipt.json').write_text(json.dumps({'status':'INCONCLUSIVE','rows':[{'id':'E001','status':'UNKNOWN','mode':'diagnostic'}]}))\n")
         self.command("git", "init", "-q", "--initial-branch=main")
         self.command("git", "add", ".")
         self.command("git", "-c", "user.name=Test", "-c", "user.email=test@example.invalid", "commit", "-qm", "Fixture")
@@ -59,6 +59,35 @@ class ReproductionTests(unittest.TestCase):
         receipt = reproduce.reproduce(self.root, self.base / "receipt")
         self.assertEqual(receipt["gate"], "FAIL")
         self.assertEqual(receipt["status"], "FAIL")
+
+    def replace_fixture(self, script, source):
+        (self.root / "scripts" / script).write_text(source)
+        self.command("git", "add", ".")
+        self.command("git", "-c", "user.name=Test", "-c", "user.email=test@example.invalid", "commit", "-qm", "Malformed fixture")
+
+    def test_incomplete_check_receipt_preserves_failure_receipt(self):
+        self.replace_fixture("check.py", "import pathlib,sys; pathlib.Path(sys.argv[2]).write_text('{}')\n")
+        receipt = reproduce.reproduce(self.root, self.base / "receipt")
+        self.assertEqual(receipt["status"], "FAIL")
+        self.assertIn("Malformed infrastructure receipt", receipt["error"])
+        self.assertTrue((self.base / "receipt/receipt.json").is_file())
+
+    def test_inconsistent_check_verdict_is_rejected(self):
+        self.replace_fixture("check.py", "import pathlib,sys,json; pathlib.Path(sys.argv[2]).write_text(json.dumps({'infrastructure':'FAIL','gate':'PASS'}))\n")
+        receipt = reproduce.reproduce(self.root, self.base / "receipt")
+        self.assertEqual(receipt["status"], "FAIL")
+
+    def test_unknown_experiment_status_is_rejected(self):
+        self.replace_fixture("experiments.py", "import pathlib,sys,json\nout=pathlib.Path(sys.argv[2]);out.mkdir()\n(out/'receipt.json').write_text(json.dumps({'status':'BOGUS','rows':[]}))\n")
+        receipt = reproduce.reproduce(self.root, self.base / "receipt")
+        self.assertEqual(receipt["status"], "FAIL")
+        self.assertIn("Malformed experiment receipt status", receipt["error"])
+
+    def test_summary_must_match_individual_experiments(self):
+        self.replace_fixture("experiments.py", "import pathlib,sys,json\nout=pathlib.Path(sys.argv[2]);out.mkdir()\n(out/'receipt.json').write_text(json.dumps({'status':'PASS','rows':[{'status':'UNKNOWN','mode':'diagnostic'}]}))\n")
+        receipt = reproduce.reproduce(self.root, self.base / "receipt")
+        self.assertEqual(receipt["status"], "FAIL")
+        self.assertIn("disagrees", receipt["error"])
 
 
 if __name__ == "__main__":

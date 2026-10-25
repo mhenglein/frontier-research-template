@@ -39,7 +39,7 @@ Each entry must have a registered `Exxx` record. `command` is an argument array;
 `{python}` resolves to the selected Python executable. `timeout_seconds` is a
 positive bound. `mode` is either `acceptance` or `diagnostic`.
 
-The experiment process must finish with a final JSON object on stdout containing
+The experiment process must finish with one final JSON line on stdout containing
 `status` and `summary`:
 
 ```json

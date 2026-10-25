@@ -22,7 +22,7 @@ The manifest has this shape:
 
 Every `id` must have a matching `Exxx` registry record. Use `acceptance` for a
 gate that must return `PASS`, and `diagnostic` for a probe whose `UNKNOWN`
-result is useful but inconclusive. The command must print one final JSON object
+result is useful but inconclusive. The command must print one final JSON line
 on stdout with `status` (`PASS`, `FAIL`, or `UNKNOWN`) and `summary`.
 
 ```json

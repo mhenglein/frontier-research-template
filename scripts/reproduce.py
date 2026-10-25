@@ -13,6 +13,7 @@ import sys
 import tempfile
 
 from research import ROOT
+from experiments import summarize
 
 
 def git(*args: str, root: Path = ROOT) -> str:
@@ -44,15 +45,27 @@ def reproduce(root: Path, output: Path, formal: bool = False) -> dict:
                 result = subprocess.run(command, cwd=clone, stdout=log, stderr=subprocess.STDOUT)
             receipt["commands"].append({"command": ["{python}", "scripts/check.py", "--receipt", "checks.json"], "exit_code": result.returncode})
             checks = json.loads(check_receipt.read_text())
+            if not isinstance(checks, dict) or checks.get("infrastructure") not in ("PASS", "FAIL"):
+                raise ValueError("Malformed infrastructure receipt")
             receipt["infrastructure"] = checks["infrastructure"]
-            if result.returncode or checks["gate"] != "PASS":
+            if result.returncode or checks.get("gate") != "PASS" or checks["infrastructure"] != "PASS":
                 raise ValueError("Fresh-clone infrastructure checks failed; see checks.log")
             command = [sys.executable, "scripts/experiments.py", "--output", str((output / "experiments").resolve())]
             with (output / "experiments.log").open("w") as log:
                 result = subprocess.run(command, cwd=clone, stdout=log, stderr=subprocess.STDOUT)
             receipt["commands"].append({"command": ["{python}", "scripts/experiments.py", "--output", "experiments"], "exit_code": result.returncode})
-            receipt["research_experiments"] = json.loads((output / "experiments/receipt.json").read_text())
-            if result.returncode or receipt["research_experiments"]["status"] == "FAIL":
+            research_receipt = json.loads((output / "experiments/receipt.json").read_text())
+            if not isinstance(research_receipt, dict) or research_receipt.get("status") not in ("PASS", "FAIL", "INCONCLUSIVE", "NOT_RUN"):
+                raise ValueError("Malformed experiment receipt status")
+            rows = research_receipt.get("rows")
+            if not isinstance(rows, list) or any(not isinstance(row, dict)
+                    or row.get("status") not in ("PASS", "FAIL", "UNKNOWN")
+                    or row.get("mode") not in ("acceptance", "diagnostic") for row in rows):
+                raise ValueError("Malformed experiment receipt rows")
+            if summarize(rows) != research_receipt["status"]:
+                raise ValueError("Experiment summary disagrees with individual verdicts")
+            receipt["research_experiments"] = research_receipt
+            if result.returncode or research_receipt["status"] == "FAIL":
                 raise ValueError("Research experiment gate failed; see experiments/")
             if formal:
                 with (output / "formal.log").open("w") as log:
